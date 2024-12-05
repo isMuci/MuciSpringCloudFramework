@@ -1,0 +1,22 @@
+spring:
+  application:
+    name:
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr:
+      username:
+      password:
+      config:
+        namespace:
+        group:
+        file-extension: yaml
+        shared-configs:
+          - data-id: xx.yaml
+            group:
+            refresh: true
+      discovery:
+        namespace:
+        group:
+        cluster-name: 

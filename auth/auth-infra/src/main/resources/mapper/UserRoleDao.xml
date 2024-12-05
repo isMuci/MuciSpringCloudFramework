@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muci.framework.auth.infra.basic.dao.UserRoleDao">
+
+    <resultMap type="com.muci.framework.auth.infra.basic.entity.UserRole" id="UserRoleMap">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="isDel" column="is_del" jdbcType="INTEGER"/>
+        <result property="createBy" column="create_by" jdbcType="INTEGER"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="INTEGER"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <insert id="insertBatch">
+        INSERT INTO s_user_role( user_id, role_id, create_by, update_by)
+        VALUES
+        <foreach collection="userRoles" item="userRole" separator=",">
+            ( #{userRole.userId}, #{userRole.roleId}, #{userRole.createBy}, #{userRole.updateBy} )
+        </foreach>
+    </insert>
+
+    <update id="updateBatch">
+        UPDATE s_user_role
+        <set>
+            <if test="userRoleOperate.isDel != null">is_del = #{userRoleOperate.isDel},</if>
+            <if test="userRoleOperate.updateBy != null">update_by = #{userRoleOperate.updateBy},</if>
+        </set>
+        WHERE is_del = 0
+        <if test="userRoleOperate.userIds != null and userRoleOperate.userIds.size() != 0">
+            AND user_id IN
+            <foreach collection="userRoleOperate.userIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="userRoleOperate.roleIds != null and userRoleOperate.roleIds.size() != 0">
+            AND role_id IN
+            <foreach collection="userRoleOperate.roleIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </update>
+
+    <select id="selects" resultMap="UserRoleMap">
+        SELECT *
+        FROM s_user_role
+        WHERE is_del = 0
+        <if test="userRoleSearch.userIds != null  and userRoleSearch.userIds.size() != 0">
+            AND user_id IN
+            <foreach collection="userRoleSearch.userIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="userRoleSearch.roleIds != null  and userRoleSearch.roleIds.size() != 0">
+            AND role_id IN
+            <foreach collection="userRoleSearch.roleIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="userRoleSearch.createBy != null">
+            AND create_by = #{userRoleSearch.createBy}
+        </if>
+        <if test="userRoleSearch.startCreate != null">
+            AND create_at &gt;= #{userRoleSearch.startCreate}
+        </if>
+        <if test="userRoleSearch.endCreate != null">
+            AND create_at &lt;= #{userRoleSearch.endCreate}
+        </if>
+        <if test="userRoleSearch.updateBy != null">
+            AND update_by = #{userRoleSearch.updateBy}
+        </if>
+        <if test="userRoleSearch.startUpdate != null">
+            AND update_at &gt;= #{userRoleSearch.startUpdate}
+        </if>
+        <if test="userRoleSearch.endUpdate != null">
+            AND update_at &lt;= #{userRoleSearch.endUpdate}
+        </if>
+    </select>
+</mapper>
+

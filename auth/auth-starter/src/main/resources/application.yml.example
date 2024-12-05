@@ -1,0 +1,25 @@
+server:
+  port:
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://ip:port/xx?allowMultiQueries=true
+    username:
+    password:
+  data:
+    redis:
+      database: 0
+      host:
+      port: 6379
+      password:
+      timeout: 10s
+      lettuce:
+        pool:
+          max-active: 200
+          max-wait: -1ms
+          max-idle: 10
+          min-idle: 0
+sa-token:
+  token-name: token
+  jwt-secret-key:
+  timeout: 2592000

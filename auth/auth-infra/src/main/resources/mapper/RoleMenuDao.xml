@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muci.framework.auth.infra.basic.dao.RoleMenuDao">
+
+    <resultMap type="com.muci.framework.auth.infra.basic.entity.RoleMenu" id="RoleMenuMap">
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="menuId" column="menu_id" jdbcType="INTEGER"/>
+        <result property="isDel" column="is_del" jdbcType="INTEGER"/>
+        <result property="createBy" column="create_by" jdbcType="INTEGER"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="INTEGER"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <insert id="insertBatch">
+        INSERT INTO s_role_menu( role_id, menu_id, create_by, update_by)
+        VALUES
+        <foreach collection="roleMenus" item="roleMenu" separator=",">
+            (#{roleMenu.roleId}, #{roleMenu.menuId} , #{roleMenu.createBy}, #{roleMenu.updateBy} )
+        </foreach>
+    </insert>
+
+    <update id="updateBatch">
+        UPDATE s_role_menu
+        <set>
+            <if test="roleMenuOperate.isDel != null">is_del = #{roleMenuOperate.isDel},</if>
+            <if test="roleMenuOperate.updateBy != null">update_by = #{roleMenuOperate.updateBy},</if>
+        </set>
+        WHERE is_del = 0
+        <if test="roleMenuOperate.roleIds != null and roleMenuOperate.roleIds.size() != 0">
+            AND role_id IN
+            <foreach collection="roleMenuOperate.roleIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="roleMenuOperate.menuIds != null and roleMenuOperate.menuIds.size() != 0">
+            AND menu_id IN
+            <foreach collection="roleMenuOperate.menuIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </update>
+
+
+    <select id="findOne" resultMap="RoleMenuMap">
+        SELECT *
+        FROM s_role_menu
+        <where>
+            is_del = 0
+            <if test="roleId != null">AND role_id = #{roleId}</if>
+            <if test="menuId != null">AND menu_id = #{menuId}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="createBy != null">AND create_by = #{createBy}</if>
+            <if test="createAt != null">AND create_at = #{createAt}</if>
+            <if test="updateBy != null">AND update_by = #{updateBy}</if>
+            <if test="updateAt != null">AND update_at = #{updateAt}</if>
+            <if test="remark != null and remark != ''">AND remark = #{remark}</if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="selects" resultMap="RoleMenuMap">
+        SELECT *
+        FROM s_role_menu
+        WHERE is_del = 0
+        <if test="roleMenuSearch.roleIds != null and roleMenuSearch.roleIds.size() != 0">
+            AND role_id IN
+            <foreach collection="roleMenuSearch.roleIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="roleMenuSearch.menuIds != null and roleMenuSearch.menuIds.size() != 0">
+            AND menu_id IN
+            <foreach collection="roleMenuSearch.menuIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="roleMenuSearch.createBy != null">
+            AND create_by = #{roleMenuSearch.createBy}
+        </if>
+        <if test="roleMenuSearch.startCreate != null">
+            AND create_at &gt;= #{roleMenuSearch.startCreate}
+        </if>
+        <if test="roleMenuSearch.endCreate != null">
+            AND create_at &lt;= #{roleMenuSearch.endCreate}
+        </if>
+        <if test="roleMenuSearch.updateBy != null">
+            AND update_by = #{roleMenuSearch.updateBy}
+        </if>
+        <if test="roleMenuSearch.startUpdate != null">
+            AND update_at &gt;= #{roleMenuSearch.startUpdate}
+        </if>
+        <if test="roleMenuSearch.endUpdate != null">
+            AND update_at &lt;= #{roleMenuSearch.endUpdate}
+        </if>
+    </select>
+</mapper>
+

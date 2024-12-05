@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muci.framework.auth.infra.basic.dao.RoleDao">
+
+    <resultMap type="com.muci.framework.auth.infra.basic.entity.Role" id="RoleMap">
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        <result property="roleKey" column="role_key" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="isDel" column="is_del" jdbcType="INTEGER"/>
+        <result property="createBy" column="create_by" jdbcType="INTEGER"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="INTEGER"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="select" resultMap="RoleMap">
+        SELECT *
+        FROM s_role
+        <where>
+            is_del = 0
+            <if test="roleId != null">AND role_id = #{roleId}</if>
+            <if test="roleName != null and roleName != ''">AND role_name = #{roleName}</if>
+            <if test="roleKey != null and roleKey != ''">AND role_key = #{roleKey}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="createBy != null">AND create_by = #{createBy}</if>
+            <if test="createAt != null">AND create_at = #{createAt}</if>
+            <if test="updateBy != null">AND update_by = #{updateBy}</if>
+            <if test="updateAt != null">AND update_at = #{updateAt}</if>
+            <if test="remark != null and remark != ''">AND remark = #{remark}</if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <update id="updateById">
+        UPDATE s_role
+        <set>
+            <if test="roleName != null and roleName != ''">role_name = #{roleName},</if>
+            <if test="roleKey != null and roleKey != ''">role_key = #{roleKey},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDel != null">is_del = #{isDel},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+        </set>
+        WHERE is_del = 0
+        AND role_id = #{roleId}
+    </update>
+
+    <select id="selects" resultMap="RoleMap">
+        SELECT *
+        FROM s_role
+        WHERE is_del = 0
+        <if test="roleSearch.roleIds != null and roleSearch.roleIds.size() != 0">
+            AND role_id IN
+            <foreach collection="roleSearch.roleIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="roleSearch.roleName != null and roleSearch.roleName != ''">
+            AND role_name LIKE CONCAT('%', #{roleSearch.roleName}, '%')
+        </if>
+        <if test="roleSearch.roleKey != null and roleSearch.roleKey != ''">
+            AND role_key LIKE CONCAT('%', #{roleSearch.roleKey}, '%')
+        </if>
+        <if test="roleSearch.status != null">
+            AND status = #{roleSearch.status}
+        </if>
+        <if test="roleSearch.createBy != null">
+            AND create_by = #{roleSearch.createBy}
+        </if>
+        <if test="roleSearch.startCreate != null">
+            AND create_at &gt;= #{roleSearch.startCreate}
+        </if>
+        <if test="roleSearch.endCreate != null">
+            AND create_at &lt;= #{roleSearch.endCreate}
+        </if>
+        <if test="roleSearch.updateBy != null">
+            AND update_by = #{roleSearch.updateBy}
+        </if>
+        <if test="roleSearch.startUpdate != null">
+            AND update_at &gt;= #{roleSearch.startUpdate}
+        </if>
+        <if test="roleSearch.endUpdate != null">
+            AND update_at &lt;= #{roleSearch.endUpdate}
+        </if>
+        <if test="roleSearch.remark != null and roleSearch.remark != ''">
+            AND remark LIKE CONCAT('%', #{roleSearch.remark}, '%')
+        </if>
+    </select>
+</mapper>
+

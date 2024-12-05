@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muci.framework.auth.infra.basic.dao.UserDao">
+
+    <resultMap type="com.muci.framework.auth.infra.basic.entity.User" id="UserMap">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+        <result property="phoneNumber" column="phone_number" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="birth" column="birth" jdbcType="TIMESTAMP"/>
+        <result property="sex" column="sex" jdbcType="INTEGER"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="isDel" column="is_del" jdbcType="INTEGER"/>
+        <result property="createBy" column="create_by" jdbcType="INTEGER"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="INTEGER"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="select" resultMap="UserMap">
+        SELECT *
+        FROM s_user
+        <where>
+            is_del = 0
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="username != null and username != ''">AND username = #{username}</if>
+            <if test="password != null and password != ''">AND password = #{password}</if>
+            <if test="nickname != null and nickname != ''">AND nickname = #{nickname}</if>
+            <if test="phoneNumber != null and phoneNumber != ''">AND phone_number = #{phoneNumber}</if>
+            <if test="email != null and email != ''">AND email = #{email}</if>
+            <if test="birth != null">AND birth = #{birth}</if>
+            <if test="sex != null">AND sex = #{sex}</if>
+            <if test="avatar != null and avatar != ''">AND avatar = #{avatar}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="createBy != null">AND create_by = #{createBy}</if>
+            <if test="createAt != null">AND create_at = #{createAt}</if>
+            <if test="updateBy != null">AND update_by = #{updateBy}</if>
+            <if test="updateAt != null">AND update_at = #{updateAt}</if>
+            <if test="remark != null and remark != ''">AND remark = #{remark}</if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <update id="updateById">
+        UPDATE s_user
+        <set>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
+            <if test="phoneNumber != null and phoneNumber != ''">phone_number = #{phoneNumber},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="birth != null">birth = #{birth},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDel != null">is_del = #{isDel},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+        </set>
+        WHERE is_del = 0
+        AND user_id = #{userId}
+    </update>
+
+    <select id="getUserRoles" resultMap="com.muci.framework.auth.infra.basic.dao.RoleDao.RoleMap">
+        SELECT DISTINCT r.*
+        FROM s_user_role ur
+                 JOIN s_role r ON ur.role_id = r.role_id
+        WHERE ur.user_id = #{userId};
+    </select>
+    <select id="getUserPerms" resultMap="com.muci.framework.auth.infra.basic.dao.MenuDao.MenuMap">
+        SELECT DISTINCT m.*
+        FROM s_user_role ur
+                 JOIN s_role_menu rm ON ur.role_id = rm.role_id AND rm.is_del = 0
+                 JOIN s_menu m ON rm.menu_id = m.menu_id AND m.is_del = 0
+        WHERE ur.is_del = 0
+          AND ur.user_id = #{userId};
+    </select>
+    <select id="selects" resultMap="UserMap">
+        SELECT *
+        FROM s_user
+        WHERE is_del = 0
+        <if test="userSearch.userIds != null and userSearch.userIds.size() != 0">
+            AND user_id IN
+            <foreach collection="userSearch.userIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="userSearch.username != null and userSearch.username != ''">
+            AND username LIKE CONCAT('%', #{userSearch.username}, '%')
+        </if>
+        <if test="userSearch.nickname != null and userSearch.nickname != ''">
+            AND nickname LIKE CONCAT('%', #{userSearch.nickname}, '%')
+        </if>
+        <if test="userSearch.phoneNumber != null and userSearch.phoneNumber != ''">
+            AND phone_number LIKE CONCAT('%', #{userSearch.phoneNumber}, '%')
+        </if>
+        <if test="userSearch.email != null and userSearch.email != ''">
+            AND email LIKE CONCAT('%', #{userSearch.email}, '%')
+        </if>
+        <if test="userSearch.startBirth != null">
+            AND birth &gt;= #{userSearch.startBirth}
+        </if>
+        <if test="userSearch.endBirth != null">
+            AND birth &lt;= #{userSearch.endBirth}
+        </if>
+        <if test="userSearch.sex != null">
+            AND sex = #{userSearch.sex}
+        </if>
+        <if test="userSearch.avatar != null and userSearch.avatar != ''">
+            AND avatar = #{userSearch.avatar}
+        </if>
+        <if test="userSearch.status != null">
+            AND status = #{userSearch.status}
+        </if>
+        <if test="userSearch.createBy != null">
+            AND create_by = #{userSearch.createBy}
+        </if>
+        <if test="userSearch.startCreate != null">
+            AND create_at &gt;= #{userSearch.startCreate}
+        </if>
+        <if test="userSearch.endCreate != null">
+            AND create_at &lt;= #{userSearch.endCreate}
+        </if>
+        <if test="userSearch.updateBy != null">
+            AND update_by = #{userSearch.updateBy}
+        </if>
+        <if test="userSearch.startUpdate != null">
+            AND update_at &gt;= #{userSearch.startUpdate}
+        </if>
+        <if test="userSearch.endUpdate != null">
+            AND update_at &lt;= #{userSearch.endUpdate}
+        </if>
+        <if test="userSearch.remark != null and userSearch.remark != ''">
+            AND remark LIKE CONCAT('%', #{userSearch.remark}, '%')
+        </if>
+    </select>
+</mapper>
+

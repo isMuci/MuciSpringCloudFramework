@@ -1,0 +1,29 @@
+server:
+  port:
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id:
+          uri: lb://
+          predicates:
+            - Path=/xx/**
+          filters:
+            - StripPrefix=1
+  data:
+    redis:
+      database: 0
+      host:
+      port: 6379
+      password:
+      timeout: 10s
+      lettuce:
+        pool:
+          max-active: 200
+          max-wait: -1ms
+          max-idle: 10
+          min-idle: 0
+sa-token:
+  token-name: token
+  jwt-secret-key:
+  timeout: 2592000
