@@ -5,10 +5,11 @@ import com.muci.framework.auth.api.entity.User;
 import com.muci.framework.auth.api.entity.UserSearch;
 import com.muci.framework.common.entity.Result;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(value = "oweikj-manage-multi-venue-auth", contextId = "userFeignClient")
+@FeignClient(value = "auth", contextId = "userFeignClient")
 public interface UserFeignClient {
     @PostMapping("user/{userId}/role")
     Result<List<Role>> findUserRoleById(@PathVariable("userId") Integer userId);

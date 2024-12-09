@@ -23,8 +23,4 @@ public class TokenUserContext {
     public static Integer getUserId() {
         return getContext().getUserId();
     }
-
-    public static Integer getEmployeeId() {
-        return getContext().getEmployeeId();
-    }
 }

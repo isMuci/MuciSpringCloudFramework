@@ -14,6 +14,7 @@ import com.muci.framework.common.entity.PageInfo;
 import com.muci.framework.common.entity.Result;
 import com.muci.framework.common.enums.ResultCode;
 import com.muci.framework.common.exception.RepeatPasswordException;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,7 +31,7 @@ public class UserController {
     private UserDomainService userDomainService;
 
     @PostMapping
-    public Result addUser(@RequestBody UserAddReq userAddReq) {
+    public Result addUser(@Valid @RequestBody UserAddReq userAddReq) {
         try {
             log.info("addUser.userAddReq : {}", JSON.toJSONString(userAddReq));
             UserBO userBO = UserDTOConverter.INSTANCE.convertToBO(userAddReq);

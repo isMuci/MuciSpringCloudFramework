@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(value = "oweikj-manage-multi-venue-auth", contextId = "menuFeignClient")
+@FeignClient(value = "auth", contextId = "menuFeignClient")
 public interface MenuFeignClient {
     @PostMapping("menu/search")
     Result<List<Menu>> findMenus(@RequestBody MenuSearch menuSearch);

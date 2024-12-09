@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
-@FeignClient(value = "oweikj-manage-multi-venue-auth", contextId = "roleFeignClient")
+@FeignClient(value = "auth", contextId = "roleFeignClient")
 public interface RoleFeignClient {
     @PostMapping("/role/{roleId}/menu")
     Result<List<Integer>> findRoleMenuById(@PathVariable("roleId") Integer roleId);

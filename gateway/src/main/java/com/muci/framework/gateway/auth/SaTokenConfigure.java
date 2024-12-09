@@ -24,8 +24,6 @@ import java.util.List;
 @Configuration
 public class SaTokenConfigure {
 
-    String[] excludeUrls = new String[] {"/favicon.ico", "/doc.html/**", "/*/v3/api-docs", "/v3/api-docs/**",
-        "/webjars/**", "/auth/user/doLogin",};
     @Autowired
     private MenuFeignClient menuFeignClient;
     @Autowired

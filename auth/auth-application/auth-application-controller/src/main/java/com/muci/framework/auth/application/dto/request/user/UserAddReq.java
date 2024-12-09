@@ -39,7 +39,8 @@ public class UserAddReq {
     private LocalDate birth;
     // 性别;0男 1女 2未知
     @NotNull(message = "性别不能为空")
-    @Size(max = 1, message = "0男 1女")
+    @Min(value = 0, message = "0男 1女")
+    @Max(value = 1, message = "0男 1女")
     private Integer sex;
     // 头像链接
     @URL(message = "头像链接格式不正确")

@@ -20,17 +20,4 @@ public class TokenUserFiller {
             return tokenUser.getUserId();
         return null;
     }
-
-    public static <T> void fillEmployeeId(T entity, BiConsumer<T, Integer> setter) {
-        TokenUser tokenUser = TokenUserContext.getContext();
-        if (ObjectUtil.isNotNull(tokenUser))
-            setter.accept(entity, tokenUser.getEmployeeId());
-    }
-
-    public static Integer getEmployeeId() {
-        TokenUser tokenUser = TokenUserContext.getContext();
-        if (ObjectUtil.isNotNull(tokenUser))
-            return tokenUser.getEmployeeId();
-        return null;
-    }
 }

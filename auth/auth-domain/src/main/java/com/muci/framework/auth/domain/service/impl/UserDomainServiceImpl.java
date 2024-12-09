@@ -18,6 +18,7 @@ import com.muci.framework.auth.infra.basic.service.RoleService;
 import com.muci.framework.auth.infra.basic.service.UserLoginService;
 import com.muci.framework.auth.infra.basic.service.UserRoleService;
 import com.muci.framework.auth.infra.basic.service.UserService;
+import com.muci.framework.common.context.RequestIPContext;
 import com.muci.framework.common.entity.LoginUser;
 import com.muci.framework.common.entity.PageInfo;
 import com.muci.framework.common.entity.Result;
@@ -25,11 +26,6 @@ import com.muci.framework.common.enums.IsDel;
 import com.muci.framework.common.enums.ResultCode;
 import com.muci.framework.common.exception.*;
 import com.muci.framework.common.util.TokenUserFiller;
-import com.muci.framework.store.api.entity.Device;
-import com.muci.framework.store.api.entity.DeviceSearch;
-import com.muci.framework.store.api.entity.Employee;
-import com.muci.framework.store.api.fegin.DeviceFeignClient;
-import com.muci.framework.store.api.fegin.EmployeeFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,12 +53,6 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Autowired
     private UserLoginService userLoginService;
-
-    @Autowired
-    private EmployeeFeignClient employeeFeignClient;
-
-    @Autowired
-    private DeviceFeignClient deviceFeignClient;
 
     @Value("${auth.create-default.user}")
     private Integer userDefaultRole;
@@ -116,8 +106,6 @@ public class UserDomainServiceImpl implements UserDomainService {
                 userBO.setPassword(BCrypt.hashpw(userBO.getPassword(), BCrypt.gensalt(10)));
             else
                 throw new RepeatPasswordException();
-        if (ObjectUtil.isNotNull(userBO.getSex()) && (userBO.getSex() | 1) != 1)
-            userBO.setSex(2);
         TokenUserFiller.fillUserId(userBO, UserBO::setUpdateBy);
         User user = UserBOConverter.INSTANCE.convertToEntity(userBO);
         userService.updateById(user);
@@ -156,6 +144,7 @@ public class UserDomainServiceImpl implements UserDomainService {
     public LoginUser doLogin(LoginUser loginBO) {
         User user = userService.find(User.builder().username(loginBO.getUsername()).build());
         log.info("doLogin.user : {}", JSON.toJSONString(user));
+        Assert.notNull(user, () -> new SaTokenException("用户名或密码错误"));
         if (user.getStatus() == 1)
             throw new UnauthorizedException("用户已被封禁");
         if (ObjectUtil.isNotNull(user) && BCrypt.checkpw(loginBO.getPassword(), user.getPassword())) {
@@ -163,27 +152,7 @@ public class UserDomainServiceImpl implements UserDomainService {
             List<String> roles =
                 userService.getUserRoles(user.getUserId()).stream().map(Role::getRoleKey).collect(Collectors.toList());
             LoginUser resLogin = UserBOConverter.INSTANCE.convertToLogin(user);
-            // boolean isSuper = roles.stream().anyMatch(s -> s.contains("SuperAdmin")); //模糊匹配
-            boolean isSuper = roles.contains("SuperAdmin"); // 全匹配
-            if (!isSuper) {
-                Result<Employee> resEmployee = employeeFeignClient.findEmployeeByUserId(user.getUserId());
-                log.info("doLogin.resEmployee : {}", JSON.toJSONString(resEmployee));
-                Assert.notNull(resEmployee.getData(),
-                    () -> new FeignRPCException(Result.fail(ResultCode.UNAUTHORIZED, "用户未绑定员工, 无法登录")));
-                Employee employee = resEmployee.getData();
-                Result<List<Device>> resDevices = deviceFeignClient.searchDevices(
-                    DeviceSearch.builder().storeIds(Collections.singletonList(employee.getStoreId())).build());
-                Assert.notNull(resDevices.getData(),
-                    () -> new FeignRPCException(Result.fail(ResultCode.UNAUTHORIZED, "员工绑定门店下无授权设备")));
-                List<String> deviceMacs = resDevices.getData().stream().map(Device::getMac).toList();
-                boolean ourDevice = deviceMacs.contains(loginBO.getLoginMac());
-                if (!ourDevice)
-                    throw new UnauthorizedException("请勿使用未授权设备进行登录");
-                resLogin.setEmployeeId(employee.getEmployeeId());
-                resLogin.setPosition(employee.getPosition());
-                resLogin.setStoreId(employee.getStoreId());
-            }
-            UserLogin userLogin = UserLogin.builder().userId(user.getUserId()).loginMac(loginBO.getLoginMac()).build();
+            UserLogin userLogin = UserLogin.builder().userId(user.getUserId()).loginMac(RequestIPContext.getContext()).build();
             userLoginService.save(userLogin);
             resLogin.setRoles(roles);
             List<String> perms =

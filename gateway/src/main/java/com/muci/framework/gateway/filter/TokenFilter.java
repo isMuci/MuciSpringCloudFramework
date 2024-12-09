@@ -36,7 +36,7 @@ public class TokenFilter implements GlobalFilter {
         log.info("filter.token : {}", token);
         if (token != null && ObjectUtil.isNotNull(StpUtil.getExtra("loginUser"))) {
             LoginUser loginUser = JSON.parseObject(StpUtil.getExtra("loginUser").toString(), LoginUser.class);
-            TokenUser tokenUser = new TokenUser(loginUser.getUserId(), loginUser.getEmployeeId());
+            TokenUser tokenUser = TokenUser.builder().userId(loginUser.getUserId()).build();
             log.info("filter.tokenUser : {}", tokenUser);
             mutate.header(TokenUserConstant.Authorization, JSON.toJSONString(tokenUser));
         }
